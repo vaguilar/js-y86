@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bootstrap 101 Template</title>
-    <!-- Bootstrap -->
+    <title>y86 Simulator</title>
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 	<style>
-		h1:first-of-type {
-			margin-top: 60px;
-		 }
+
+		.code {
+			font-size: 12px;
+			font-family: monospace;
+			width: 100%;
+			height: 320px;
+			overflow: auto;
+		}
+
+		.info { height: auto; }
+
+		.left { text-align: left; }
+		.center { text-align: center; }
+		.right { text-align: right; }
+
 	</style>
   </head>
   <body>
@@ -33,27 +44,118 @@
     </div>
 
     <div class="container">
+		<p>&nbsp;</p>
+		<p>&nbsp;</p>
+		<div class="row">
+			<div class="span4">
+				<h1>y86 Simulator</h1>
+				<p>Start coding and press run.</p>
+			</div>
+			<div class="span4 center">
+				<h4>&nbsp;</h4>
+				<button id="run" class="btn btn-primary">Run</button>
+				<button id="step" class="btn">Step</button>
+				<button id="reset" class="btn">Reset</button>
+			</div>
+			<div class="span4">
+				<br />
+				<textarea id="info" rows="2" class="code info"></textarea>	
+			</div>
+		</div>
 
-      <h1>Bootstrap starter template</h1>
-      <p>Use this document as a way to quick start any new project.<br> All you get is this message and a barebones HTML document.</p>
+		<div class="row content">
+			<div class="span3">
+				<textarea id="stack" class="code"></textarea> Stack	
+			</div>
+			<div class="span3">
+				<textarea id="assembled" class="code"></textarea> Assembled	
+			</div>
+			<div class="span6 center">
+				<textarea id="y86" class="code"># Execution begins at address 0
+.pos 0
+init: irmovl Stack, %esp # Setup stack pointer
+irmovl Stack, %ebp # Set up base pointer
+call Main # Execute main program
+halt # Terminate program
 
-	<div class="row">
-		<div class="span4">...</div>
-		<div class="span8">...</div>
+# Array of 4 elements
+.align 4
+array: .long 0xd
+.long 0xc0
+.long 0xb00
+.long 0xa000
+
+Main: pushl %ebp
+rrmovl %esp,%ebp
+irmovl $4,%eax
+pushl %eax # Push 4
+irmovl array,%edx
+pushl %edx # Push array
+call Sum # Sum(array, 4)
+rrmovl %ebp,%esp
+popl %ebp
+ret
+
+# int Sum(int *Start, int Count)
+Sum: pushl %ebp
+rrmovl %esp,%ebp
+mrmovl 8(%ebp),%ecx # ecx = Start
+mrmovl 12(%ebp),%edx # edx = Count
+xorl %eax,%eax # sum = 0
+andl %edx,%edx # Set condition codes
+je End
+Loop: mrmovl (%ecx),%esi # get *Start
+addl %esi,%eax # add to sum
+irmovl $4,%ebx #
+addl %ebx,%ecx # Start++
+irmovl $-1,%ebx #
+addl %ebx,%edx # Count--
+jne Loop # Stop when 0
+End: rrmovl %ebp,%esp
+popl %ebp
+ret
+
+# The stack starts here and grows to lower addresses
+.pos 0x100
+Stack:</textarea> Code
+			</div>
+		</div>
+		
 	</div>
+	
+	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/y86-assembler.js"></script>
 
-	<button class="btn btn-primary">Run</button>
-	<button class="btn">Step</button>
-	<button class="btn">Reset</button>
-	<br/>
-	<br/>
-	<textarea rows="3"></textarea>
+	<script>
+		//Assemble when Run is clicked
+		$('#run').click(function(){
+			var assembled = assemble($('#y86').val()),
+				formatted = $.map(assembled, function(x){
+					
+					if(x.search(/^[\da-fA-F]+$/g) > -1){
+						return '0x' + x; 
+					}else{
+						return x;
+					}
+				});
+				formatted = formatted.join('\n');
 
-    </div> 
- 
+			$('#assembled').val(formatted);
+			$('#y86').scroll();
+		});
 
-   <script src="http://code.jquery.com/jquery-latest.js"></script>
-    <script src="js/bootstrap.min.js"></script>
+		//Scroll assembled and code at the same time
+		$('#y86').scroll(function(){
+			$('#assembled').scrollTop($(this).scrollTop())
+		});
+
+		$('#assembled').scroll(function(){
+			$('#y86').scrollTop($(this).scrollTop())
+		});
+
+	</script>
+
   </body>
 </html>
 
