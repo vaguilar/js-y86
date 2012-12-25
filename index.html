@@ -59,7 +59,7 @@
 			</div>
 			<div class="span4">
 				<br />
-				<textarea id="info" rows="2" class="code info"></textarea>	
+				<textarea id="info" rows="3" class="code info"></textarea>	
 			</div>
 		</div>
 
@@ -126,6 +126,7 @@ Stack:</textarea> Code
 	<script src="http://code.jquery.com/jquery-latest.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/y86-assembler.js"></script>
+	<script src="js/y86-instructions.js"></script>
 
 	<script>
 		//Assemble when Run is clicked
@@ -153,6 +154,20 @@ Stack:</textarea> Code
 		$('#assembled').scroll(function(){
 			$('#y86').scrollTop($(this).scrollTop())
 		});
+
+		function showRegisters(){
+			var result = '';
+			for(r in REG){
+				result += r.substr(1) + ': ' + '0x' + toHex(REG[r]) + '  ';
+			}
+
+			result += ' cc: ' + CC['n'] + CC['z'] + CC['p'];
+	
+			$('#info').val(result);
+
+		}
+
+		showRegisters();
 
 	</script>
 
