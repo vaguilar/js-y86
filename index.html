@@ -123,7 +123,7 @@ Stack:</textarea> Code
 		
 	</div>
 	
-	<script src="http://code.jquery.com/jquery-latest.js"></script>
+	<script src="js/jquery-1.8.3.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script src="js/y86-assembler.js"></script>
 	<script src="js/y86-instructions.js"></script>
@@ -140,7 +140,9 @@ Stack:</textarea> Code
 						return x;
 					}
 				});
-				formatted = formatted.join('\n');
+			formatted = formatted.join('\n');
+
+			execute(MEM);
 
 			$('#assembled').val(formatted);
 			$('#y86').scroll();
@@ -157,6 +159,8 @@ Stack:</textarea> Code
 
 		function showRegisters(){
 			var result = '';
+			$('#info').val('');
+			
 			for(r in REG){
 				result += r.substr(1) + ': ' + '0x' + toHex(REG[r]) + '  ';
 			}
