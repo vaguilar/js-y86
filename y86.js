@@ -133,8 +133,12 @@ function ENCODE(instr, symbols) {
 	if (inst2fn.hasOwnProperty(instr)) {
 		vars['fn'] = inst2fn[instr];
 	}
-	result = ASSEM[icode].call(vars);
-
+	
+	if (icode in ASSEM) {
+		result = ASSEM[icode].call(vars);
+	} else {
+		return false;
+	}
 	return result;
 }
 
@@ -202,7 +206,11 @@ function ASSEMBLE (raw) {
 		line = lines[i];
 		inst = line.match(/^([a-z]+)(.*)/i);
 		if (inst) {
-			result[i] += ENCODE(line, symbols) + ' ';
+			var r = ENCODE(line, symbols);
+			if (r === false) {
+				return 'Invalid instructon "' + line + '" on line ' + counter;
+			}
+			result[i] += r + ' ';
 		}
 		result[counter] += '|' + (raw[counter] !== '' ? ' ' + raw[counter] : '');
 		counter++;
@@ -281,65 +289,27 @@ function toByteArray(str) {
 
 //check if on node.js and execute the first arg as a file
 if (typeof require !== 'undefined') {
-	if (process.argv.length > 2) {
-		var filename = process.argv[2],
+	if (process.argv.length === 4) {
+		var option = process.argv[2],
+			filename = process.argv[3],
 			source = fs.readFileSync(filename, 'utf8');
-		print('Running ' + filename + '...');
-		try {
+
+		if (option === '-a') {
+			// assemble file 
+			print(ASSEMBLE(source));
+		}
+		else if (option === '-e') {
+			// execute file
 			var bytearr = toByteArray(source);
+			print('Executing ' + filename + '...');
 			EXECUTE(bytearr);
 			printRegisters(REG);
-		} 
-		catch (err) {
-			print(err);
+			print('STAT = ' + STAT);
 		}
-	}else{
-		bytearr = [
-			 0x30, 0xf4, 0x00, 0x01, 0x00, 0x00, 
-			 0x30, 0xf5, 0x00, 0x01, 0x00, 0x00, 
-			 0x80, 0x24, 0x00, 0x00, 0x00, 
-			 0x00, 0x01, 0x01,
-			 0x0d, 0x00, 0x00, 0x00, 
-			 0xc0, 0x00, 0x00, 0x00, 
-			 0x00, 0x0b, 0x00, 0x00, 
-			 0x00, 0xa0, 0x00, 0x00, 
-			 0xa0, 0x5f, 
-			 0x20, 0x45, 
-			 0x30, 0xf0, 0x04, 0x00, 0x00, 0x00, 
-			 0xa0, 0x0f, 
-			 0x30, 0xf2, 0x14, 0x00, 0x00, 0x00, 
-			 0xa0, 0x2f, 
-			 0x80, 0x42, 0x00, 0x00, 0x00, 
-			 0x20, 0x54, 
-			 0xb0, 0x5f, 
-			 0x90, 
-			 0xa0, 0x5f, 
-			 0x20, 0x45, 
-			 0x50, 0x15, 0x08, 0x00, 0x00, 0x00, 
-			 0x50, 0x25, 0x0c, 0x00, 0x00, 0x00, 
-			 0x63, 0x00, 
-			 0x62, 0x22, 
-			 0x73, 0x78, 0x00, 0x00, 0x00, 
-			 0x50, 0x61, 0x00, 0x00, 0x00, 0x00, 
-			 0x60, 0x60, 
-			 0x30, 0xf3, 0x04, 0x00, 0x00, 0x00, 
-			 0x60, 0x31, 
-			 0x30, 0xf3, 0xff, 0xff, 0xff, 0xff, 
-			 0x60, 0x32, 
-			 0x74, 0x5b, 0x00, 0x00, 0x00, 
-			 0x20, 0x54, 
-			 0xb0, 0x5f, 
-			 0x90, 
-		];
-		EXECUTE(bytearr);
-		//printRegisters(REG);
-		//printMemory();
-
-
-		source = fs.readFileSync('asum.ys', 'utf8');
-		source = ASSEMBLE(source);
-
-		process.stdout.write(source);
-
+		else {
+			print('Invalid option. -a for assemble or -e for execute');
+		}
+	} else {
+		print('Invalid format. Must be formatted like \'node y86.js option filename\'.');
 	}
 }
