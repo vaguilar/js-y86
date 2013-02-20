@@ -3,7 +3,8 @@ var PC 		= 0,
 	REG		= [0, 0, 0, 0, 0, 0, 0, 0],
 	STAT	= 'AOK',
 	MEMORY 	= [],
-	SF = 0, ZF = 0, OF = 0;
+	SF = 0, ZF = 0, OF = 0,
+	ERR = 'AOK';
 
 // Include files if in nodejs, otherwise include them manually
 if (typeof require !== 'undefined') {
@@ -17,6 +18,15 @@ if (typeof require !== 'undefined') {
 // Print
 function print (x) {
 	console.log(x);
+}
+
+// Reset
+function RESET() {
+	PC 	= 0;
+	REG	= [0, 0, 0, 0, 0, 0, 0, 0];
+	STAT = 'AOK';
+	SF = 0; ZF = 0; OF = 0;
+	ERR = 'AOK';
 }
 
 // Load
@@ -137,7 +147,9 @@ function ENCODE(instr, symbols) {
 	if (icode in ASSEM) {
 		result = ASSEM[icode].call(vars);
 	} else {
-		return false;
+		//print('Invalid instruction ' + instr);
+		ERR = 'INS';
+		return '';
 	}
 	return result;
 }
@@ -150,6 +162,7 @@ function ASSEMBLE (raw) {
 		sym, next = 0,
 		counter = 0;
 		raw = raw.split('\n');
+	RESET();
 	// Clean up raw e.g. remove comments, fix spacing
 	for (i in lines) {
 		line = lines[i];
@@ -206,11 +219,11 @@ function ASSEMBLE (raw) {
 		line = lines[i];
 		inst = line.match(/^([a-z]+)(.*)/i);
 		if (inst) {
-			var r = ENCODE(line, symbols);
-			if (r === false) {
-				return 'Invalid instructon "' + line + '" on line ' + counter;
-			}
-			result[i] += r + ' ';
+			result[i] += ENCODE(line, symbols) + ' ';
+		}
+		if (ERR !== 'AOK') {
+			//print('Invalid instruction at ' + counter);
+			return 'Invalid instruction "' + line + '" on line ' + (counter + 1);
 		}
 		result[counter] += '|' + (raw[counter] !== '' ? ' ' + raw[counter] : '');
 		counter++;
@@ -227,7 +240,7 @@ function EXECUTE (bytearr) {
 		instr;
 		MEMORY 	= bytearr;
 		STAT	= 'AOK';
-
+	RESET();
 	while (PC < numbytes && STAT === 'AOK') {
 		icode = MEMORY[PC] >> 4;
 		ilen = INSTRUCTION_LEN[icode];

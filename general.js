@@ -43,13 +43,20 @@ function print(x){
 }
 
 function printRegisters(registers){
+	print(reg2str(registers));
+}
+
+function reg2str(registers){
+	var result = ''
 	for (r in registers) {
 		if (r.length === 1) {
-			print(num2reg[r] + ': ' + registers[r].toString(16));
+			result += (num2reg[r] + ': ' + registers[r].toString(16));
 		} else {
-			print(r + ': ' + registers[r].toString(16));
+			result += (r + ': ' + registers[r].toString(16));
 		}
+		result += '\n';
 	}
+	return result;
 }
 
 function printMemory(){
