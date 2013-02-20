@@ -91,13 +91,23 @@ ret
 .pos 0x100
 Stack:</textarea> Code
 	</div>
-	<div class="col3 center" style="width: 40%">
+	<div class="col3 center" style="width: 42%">
 		<textarea id='assembled' class='code'></textarea> Assembled
 	</div>
 	<div class="col3 right" style="width: 16%">
 		<textarea id='result' class='code'></textarea> Result
 	</div>
-	
+
+	<div class="center"> By Victor Aguilar | 
+	<script>
+		var e = [118, 105, 99, 116, 111, 114, 97, 103, 117, 105, 108, 97, 114, 57, 48, 32, 123, 97, 116, 125, 32, 103, 109, 97, 105, 108, 32, 99, 111, 109], r = '';
+		for (c in e) {
+			r += String.fromCharCode(e[c]);
+		}
+		document.write(r);
+	</script>
+	</div>
+
 	<script src="y86.js"></script>
 	<script src="assem.js"></script>
 	<script src="instr.js"></script>
