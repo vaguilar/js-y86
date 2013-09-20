@@ -1,3 +1,74 @@
+/* Assemble a string of y86 assembly */
+function assemble(assembly) {
+	var objectCode = [],
+		st = {},
+		lines = assembly.split("\n");
+
+	symbolTable(lines, st);
+
+	for (i in lines) {
+		var line = lines[i].trim(),
+			assembled = assembleInstruction(line, st);
+		objectCode.push(assembled); 
+	}
+
+	return objectCode.join("\n");
+}
+
+/* Create symbol table */
+function symbolTable(lines, st) {
+	var symbol = /^(\w+):\s*/,
+		instruction = /^(\w+)\s+/,
+		byteCounter = 0;
+
+	for(key in lines) {
+		var line = lines[key];
+
+		if (symbol.test(line)) {
+			var s = line.match(symbol)[1];
+			lines[key] = line.replace(symbol, "");
+			st[s] = byteCounter;
+		}
+
+		if (instruction.test(line)) {
+			var i = line.match(instruction)[1];
+			byteCounter += instr2len[i];
+		}
+	}
+	return lines.join("\n");
+}
+
+function assembleInstruction(line) {
+	var parsed = parseInstruction(line),
+		result = "";
+
+	
+
+	return result;
+}
+
+function parseInstruction(line) {
+	var instr 	= line.replace(/\s+.*/, "") + "";
+		args  	= (line.replace(/(^\w+\s+)|(#.*)/g, "") + []).split(","),
+		comment = line.replace(/^[^#]*/, "") + "",
+		result 	= [instr];
+
+	args = args.map(function(x){ return x.trim() });
+	console.log(instr);
+	console.log(args);
+	console.log(comment);
+
+	if (args.length > 0) {
+		result = result.concat(args);
+	}
+	
+	if (comment !== "") {
+		result = result.concat([comment]);
+	}
+
+	return result;
+}
+
 var ASSEM = [];
 
 ASSEM[0] = function () {
