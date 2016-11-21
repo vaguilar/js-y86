@@ -1,5 +1,4 @@
-js-y86
-======
+# js-y86
 
 js-y86 is an assembler and simulator written in Javascript. 
 
@@ -13,3 +12,5 @@ To execute, run:
 	
 	node y86.js -e object.yo
 
+## License
+This project is licensed under the terms of the MIT license.
